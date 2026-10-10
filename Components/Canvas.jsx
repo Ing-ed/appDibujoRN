@@ -43,11 +43,6 @@ export function Canvas() {
         setPick(false)
     }
     
-    async function FindSignServer(){
-        const ip = await Network.getIpAddressAsync();
-        console.log(ip);
-    }
-
     async function handleShare(){
         try{
              if(!viewShotRef.current) return;
@@ -122,7 +117,6 @@ export function Canvas() {
                 <Button text={"Clear"} onPress={handleClearButton} />
                 <Button text={"Color"} onPress={()=>setPick(true)}/>
                 <Button text={"Guardar"} onPress={handleShare}/>
-                <Button text={"VerIp"} onPress={FindSignServer}/>
             </View>
             {pick ?
                 <ColorPicker visible={pick} onClose={ColorSelected} onSelectColor={(color)=>setColor(color)}/>:<></>
