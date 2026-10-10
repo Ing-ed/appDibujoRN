@@ -1,9 +1,10 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import React, { useState, useRef } from "react";
+import { View, TouchableOpacity, Text, StyleSheet, Modal } from "react-native";
 import { Button } from "./Button";
 import { Svg, Path } from "react-native-svg";
 import { ColorPicker } from "./ColorPicker";
-// import { MyModal } from "./MyModal";
+import ViewShot from "react-native-view-shot";
+import * as Sharing from 'expo-sharing'
 
 export function Canvas() {
     const [paths, setPaths] = useState([]);
@@ -11,6 +12,10 @@ export function Canvas() {
     const [pick, setPick] = useState(false);
     const [color, setColor] = useState("#000000");
     const [options, setOptions] = useState(false);
+
+    const viewShotRef = useRef(null);
+
+    // const [status, requestPermission] = MediaLibrary.usePermissions();
 
     function handleTouchMove(event) {
         const { locationX, locationY } = event.nativeEvent;
@@ -21,64 +26,110 @@ export function Canvas() {
     }
 
     function handleTouchEnd() {
-    if (currentPath.length > 0) {
-      // Guardamos el trazo junto con su color
-      setPaths((prevPaths) => [
-        ...prevPaths,
-        { d: currentPath.join(" "), color: color },
-      ]);
-      setCurrentPath([]);
+        if (currentPath.length > 0) {
+        setPaths((prevPaths) => [...prevPaths,{ d: currentPath.join(" "), color: color }]);
+        setCurrentPath([]);
+        }
     }
-  }
 
-
+    
     function handleClearButton() {
         setPaths([]);
         setCurrentPath([]);
     }
-
+    
     function ColorSelected(){
         setPick(false)
+    }
+    
+    async function handleShare(){
+        try{
+             if(!viewShotRef.current) return;
+            //catpura del canvas
+            const uri = await viewShotRef.current.capture();
+            const availableShare = await Sharing.isAvailableAsync();
+            if(!availableShare){
+                Alert.alert("Error","No se puede compartir");
+                return;
+            }
+            await Sharing.shareAsync(uri,{
+                mimeType:'image/png',
+                dialogTitle:"Compartir",
+                UTI:'imagen.png'
+            })
+        } catch(error){
+            console.log("Error al exportar")
+        }
+    }
+
+    async function handleCapture(){
+        console.log("Guardar")
+        try{
+            if(!viewShotRef.current) return;
+            //catpura del canvas
+            const uri = await viewShotRef.current.capture();
+            console.log(`Guardado como ${uri}`)
+            return uri;
+        } catch(error){
+            console.log(`Error: ${error}`);
+        }
     }
 
     return (
         <View style={styles.container}>
+            <ViewShot
+                ref={viewShotRef}
+                options={{format:"png", quality: 1.0,result:"tmpfile"}}
+                style={styles.svgContainer}>
             <View
                 style={styles.svgContainer}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-            >
+                >
                 <Svg style={StyleSheet.absoluteFill}>
                     {paths.map((item, index) => (
                         <Path
-                            key={`path-${index}`}
-                            d={item.d}
-                            stroke={item.color}
-                            fill="transparent"
-                            strokeWidth={3}
-                            strokeLinejoin="round"
-                            strokeLinecap="round"
+                        key={`path-${index}`}
+                        d={item.d}
+                        stroke={item.color}
+                        fill="transparent"
+                        strokeWidth={3}
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
                         />
                     ))}
 
                     {currentPath.length > 0 && (
                         <Path
-                            d={currentPath.join(" ")}
-                            stroke={color}
-                            fill="transparent"
-                            strokeWidth={3}
-                            strokeLinejoin="round"
-                            strokeLinecap="round"
+                        d={currentPath.join(" ")}
+                        stroke={color}
+                        fill="transparent"
+                        strokeWidth={3}
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
                         />
                     )}
                 </Svg>
             </View>
-            <Button text={"Clear"} onPress={handleClearButton} />
-            <Button text={"Color"} onPress={()=>setPick(true)}/>
-            <Button text={"Options"} onPress={()=>setOptions(true)}/>
+            </ViewShot>
+            <View>
+                <Button text={"Clear"} onPress={handleClearButton} />
+                <Button text={"Color"} onPress={()=>setPick(true)}/>
+                <Button text={"Guardar"} onPress={handleShare}/>
+            </View>
             {pick ?
                 <ColorPicker visible={pick} onClose={ColorSelected} onSelectColor={(color)=>setColor(color)}/>:<></>
             }
+            <Modal visible={options}>
+                <View>
+                    <Text>Guardar?</Text>
+                </View>
+                <View>
+                    <Button text={"Guardar"} onPress={()=>console.log("Guardar")}/>
+                    <Button text={"Cancelar"} onPress={()=>setOptions(false)}/>
+                </View>
+            </Modal>
+            
         </View>
     );
 }
