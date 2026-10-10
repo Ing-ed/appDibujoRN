@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from 'react-native';
-
+import {SizeSlider} from './SizeSlider'
 const PALETTE = [
   '#000000', // Negro
   '#FF0000', // Rojo
@@ -13,7 +13,7 @@ const PALETTE = [
   '#8B4513', // Marrón
 ];
 
-export function ColorPicker({ visible, currentColor, onSelectColor, onClose }) {
+export function ColorPicker({ visible, currentColor, onSelectColor, onClose, wValue,wOnChange }) {
   return (
     <Modal
       animationType="fade"
@@ -48,7 +48,7 @@ export function ColorPicker({ visible, currentColor, onSelectColor, onClose }) {
               );
             })}
           </View>
-
+          <SizeSlider value={wValue} onChange={wOnChange}/>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Cancelar</Text>
           </TouchableOpacity>

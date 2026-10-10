@@ -12,7 +12,8 @@ export function Canvas() {
     const [currentPath, setCurrentPath] = useState([]);
     const [pick, setPick] = useState(false);
     const [color, setColor] = useState("#000000");
-    const [options, setOptions] = useState(false);
+    const [width, setWidth] = useState(3);
+    // const [options, setOptions] = useState(false);
 
     const viewShotRef = useRef(null);
 
@@ -28,7 +29,7 @@ export function Canvas() {
 
     function handleTouchEnd() {
         if (currentPath.length > 0) {
-        setPaths((prevPaths) => [...prevPaths,{ d: currentPath.join(" "), color: color }]);
+        setPaths((prevPaths) => [...prevPaths,{ d: currentPath.join(" "), color: color, width:width }]);
         setCurrentPath([]);
         }
     }
@@ -94,7 +95,7 @@ export function Canvas() {
                         d={item.d}
                         stroke={item.color}
                         fill="transparent"
-                        strokeWidth={3}
+                        strokeWidth={item.width}
                         strokeLinejoin="round"
                         strokeLinecap="round"
                         />
@@ -105,7 +106,7 @@ export function Canvas() {
                         d={currentPath.join(" ")}
                         stroke={color}
                         fill="transparent"
-                        strokeWidth={3}
+                        strokeWidth={width}
                         strokeLinejoin="round"
                         strokeLinecap="round"
                         />
@@ -119,9 +120,9 @@ export function Canvas() {
                 <Button text={"Guardar"} onPress={handleShare}/>
             </View>
             {pick ?
-                <ColorPicker visible={pick} onClose={ColorSelected} onSelectColor={(color)=>setColor(color)}/>:<></>
+                <ColorPicker visible={pick} onClose={ColorSelected} onSelectColor={(color)=>setColor(color)} wValue={width} wOnChange={(width)=> setWidth(width)}/>:<></>
             }
-            <Modal visible={options}>
+            {/* <Modal visible={options}>
                 <View>
                     <Text>Guardar?</Text>
                 </View>
@@ -129,7 +130,7 @@ export function Canvas() {
                     <Button text={"Guardar"} onPress={()=>console.log("Guardar")}/>
                     <Button text={"Cancelar"} onPress={()=>setOptions(false)}/>
                 </View>
-            </Modal>
+            </Modal> */}
             
         </View>
     );
