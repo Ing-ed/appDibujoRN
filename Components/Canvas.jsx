@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, Modal } from "react-native";
+import { View,Dimensions, TouchableOpacity, Text, StyleSheet, Modal,StatusBar } from "react-native";
 import { Button } from "./Button";
 import { Svg, Path } from "react-native-svg";
 import { ColorPicker } from "./ColorPicker";
@@ -9,6 +9,7 @@ import * as Network from 'expo-network'
 
 export function Canvas() {
     const [paths, setPaths] = useState([]);
+    const [redoStack, setRedoStack] = useState([]);
     const [currentPath, setCurrentPath] = useState([]);
     const [pick, setPick] = useState(false);
     const [color, setColor] = useState("#000000");
@@ -18,6 +19,20 @@ export function Canvas() {
     const viewShotRef = useRef(null);
 
     // const [status, requestPermission] = MediaLibrary.usePermissions();
+
+    function handleUndo() {
+        if (paths.length === 0) return;
+        const lastPath = paths[paths.length - 1];
+        setPaths((prev) => prev.slice(0, -1));
+        setRedoStack((prev) => [...prev, lastPath]);
+    }
+
+    function handleRedo() {
+        if (redoStack.length === 0) return;
+        const lastPath = redoStack[redoStack.length - 1];
+        setRedoStack((prev) => prev.slice(0, -1));
+        setPaths((prev) => [...prev, lastPath]);
+    }
 
     function handleTouchMove(event) {
         const { locationX, locationY } = event.nativeEvent;
@@ -79,6 +94,10 @@ export function Canvas() {
 
     return (
         <View style={styles.container}>
+            <View style={{...styles.buttonContainer,marginTop:StatusBar.currentHeight}}>
+                <Button text={"<"} onPress={handleUndo}/>
+                <Button text={">"} onPress={handleRedo}/>
+            </View>
             <ViewShot
                 ref={viewShotRef}
                 options={{format:"png", quality: 1.0,result:"tmpfile"}}
@@ -114,13 +133,13 @@ export function Canvas() {
                 </Svg>
             </View>
             </ViewShot>
-            <View>
+            <View style={styles.buttonContainer}>
                 <Button text={"Clear"} onPress={handleClearButton} />
                 <Button text={"Color"} onPress={()=>setPick(true)}/>
                 <Button text={"Guardar"} onPress={handleShare}/>
             </View>
             {pick ?
-                <ColorPicker visible={pick} onClose={ColorSelected} onSelectColor={(color)=>setColor(color)} wValue={width} wOnChange={(width)=> setWidth(width)}/>:<></>
+                <ColorPicker visible={pick} currentColor={color} onClose={ColorSelected} onSelectColor={(color)=>setColor(color)} wValue={width} wOnChange={(width)=> setWidth(width)}/>:<></>
             }
             {/* <Modal visible={options}>
                 <View>
@@ -140,6 +159,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         width: "100%",
+        // alignItems:"center"
     },
     svgContainer: {
         flex: 1,
@@ -150,4 +170,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#eee",
         alignItems: "center",
     },
+    buttonContainer:{
+        display:"flex",
+        flexDirection:"row",
+        alignItems:"center",
+        justifyContent:"cener",
+        alignSelf:"center"
+    }
 });

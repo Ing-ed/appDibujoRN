@@ -9,7 +9,10 @@ const PALETTE = [
   '#FF00FF', // Magenta
   '#00FFFF', // Cian
   '#FFA500', // Naranja
-  '#800080', // Púrpura
+  '#FF00A5', // Fuccia
+  '#00FFA5', // Turquesa
+  '#00A5FF', // Celeste
+  '#A500FF', // Violeta
   '#8B4513', // Marrón
 ];
 
@@ -42,16 +45,13 @@ export function ColorPicker({ visible, currentColor, onSelectColor, onClose, wVa
                   ]}
                   onPress={() => {
                     onSelectColor(color);
-                    onClose();
+                    // onClose();
                   }}
                 />
               );
             })}
           </View>
           <SizeSlider value={wValue} onChange={wOnChange}/>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Text style={styles.closeButtonText}>Cancelar</Text>
-          </TouchableOpacity>
         </View>
       </TouchableOpacity>
     </Modal>
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     height: 44,
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#fff',
   },
   selectedCircle: {
     borderWidth: 3,
